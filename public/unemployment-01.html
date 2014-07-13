@@ -1,0 +1,247 @@
+<html><head>
+<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+<script type="text/javascript" src="/js/jquery-2.1.0.min.js"></script>
+<script type="text/javascript" src="/js/d3.v3.4.6.js"></script>
+<style>
+body{
+	margin: 0px;
+  background: #fcfcfa;
+}
+.background
+{
+	fill: rgba(80,120,100,.5);
+}
+
+.stroke {
+  fill: none;
+  stroke: #000;
+  stroke-width: 3px;
+}
+.fill {
+  fill: #fff;
+}
+.graticule {
+  fill: none;
+  stroke: #777;
+  stroke-width: .5px;
+  stroke-opacity: .5;
+}
+
+.land {
+  fill: #222;
+}
+
+.boundary {
+  fill: none;
+  stroke: #fff;
+  stroke-width: .5px;
+}
+
+.night {
+  stroke: steelblue;
+  fill: steelblue;
+  fill-opacity: .3;
+}
+
+text {
+  font-family: Menlo, monospace;
+}
+
+</style>
+<title>Unemployment Drivers</title>
+<meta charset="utf-8"></head>
+<body>
+<script>
+var width = 900,
+    height = 600,
+    line1 = 100,
+    line2 = 200,
+    line3 = 400;
+    
+    
+//var socket = io.connect();
+//socket.on("generic_data", function(d){
+//data = prep_data(d);
+
+d3.json("/js/testdata.JSON",function(d){
+	console.log(d);
+
+y1 = null;
+h1 = null;
+y2 = null;
+h2 = null;
+y3 = null;
+h3 = null;
+y4 = null;
+h4 = null;
+
+if(d.b*d.b > d.c*d.c){
+	if(d.b < 0){
+		y1 = line1;
+		y2 = line1;
+		h2 = line2 - line1;
+		if(d.c < 0) {
+			y3 = line2;
+			h3 = (h2/Math.sqrt(d.b*d.b)) * Math.sqrt(d.c*d.c);
+		} else {
+			h3 = (h2/Math.sqrt(d.b*d.b)) * d.c;
+			y3 = y2+h2-h3;
+		}
+	} else {
+		y1 = line2;
+		y2 = line1;
+		h2 = line2 - line1;
+		if (d.c < 0){
+			y3 = line1;
+			h3 = (h2/d.b) * Math.sqrt(d.c*d.c); //just use Math.abs()
+		} else {
+			h3 = (h2/d.b) * d.c;
+			y3 = y2-h3;
+		}
+	}
+	y4 = y3+h3;
+	h4 = line3-y4;
+} else {
+	y3 = line1;
+	h3 = line2-line1;
+	if (d.c < 0){
+		y4 = line2;
+		h4 = line3-line2;
+		if(d.b < 0) {
+			h2 = (h3/Math.sqrt(d.c*d.c)) * Math.sqrt(d.b*d.b);
+			y2 = line1 - h2;
+			y1 = y2;
+		} else {
+			y2 = line1;
+			h2 = (h3/Math.sqrt(d.c*d.c)) * Math.sqrt(d.b*d.b);
+			y1 = y2+h2;
+		}
+		h1 = line3-y1;
+	} else {
+		
+	}
+}
+
+
+
+
+
+
+	draw({
+		y1:y1,
+		y2:y2,
+		y3:y3,
+		y4:y4,
+		h1:line3-y1,
+		h2:h2,
+		h3:h3,
+		h4:line3-y4
+	});
+});
+
+function draw(data){
+console.log(data);
+var x1 = 100,
+		x2 = 200,
+		x3 = 300,
+		x4 = 400,
+		x5 = 500;
+
+var svg = d3.select("body").append("svg").attr("id","vis")
+    .attr("width", width)
+    .attr("height", height);
+
+svg.append("svg:rect").attr({
+	"width": width,
+	"height": height,
+	"fill": "skyblue"
+});
+
+svg.append("svg:text")
+	.text("DRIVERS OF CHANGE IN THE UNEMPLOYMENT RATE")
+	.attr({
+		"x": 10,
+		"y": 30,
+		"font-size": 30
+	});
+svg.append("svg:text")
+	.text("Percent")
+	.attr({
+		"x": 10,
+		"y": 50
+	});
+
+
+
+console.log(y1);
+svg.append("svg:rect")
+	.attr({
+		"x": x1,
+		"y": data.y1,
+		"height": data.h1,
+		"width": 100,
+		"fill": "black"
+	});
+svg.append("svg:rect")
+	.attr({
+		"x": x2,
+		"y": data.y2,
+		"height": data.h2,
+		"width": 100,
+		"fill": "black"
+	});
+svg.append("svg:rect")
+	.attr({
+		"x": x3,
+		"y": data.y3,
+		"height": data.h3,
+		"width": 100,
+		"fill": "black"
+	});
+svg.append("svg:rect")
+	.attr({
+		"x": x4,
+		"y": data.y3,
+		"height": data.h3,
+		"width": 100,
+		"fill": "black"
+	});
+
+
+}
+
+
+</script>
+</body></html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

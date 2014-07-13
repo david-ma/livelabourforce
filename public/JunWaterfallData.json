@@ -1,0 +1,11 @@
+{
+ "ur_prior": [ 0.059141 ],
+"pop_impact": [ 0.001477 ],
+"part_impact": [ -0.000582 ],
+"jobs_impact": [ -0.000864 ],
+"ur_current": [ 0.059173 ],
+"pop_growth_rate": ["0.16%"],
+"part_rate_change": ["-0.06%"],
+"jobs_added": ["10.6k"]
+}
+

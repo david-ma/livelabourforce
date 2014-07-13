@@ -1,0 +1,319 @@
+<html><head>
+<script type="text/javascript" src="/socket.io/socket.io.js"></script>
+<script type="text/javascript" src="/js/jquery-2.1.0.min.js"></script>
+<script type="text/javascript" src="/js/d3.v3.4.6.js"></script>
+<style>
+body{
+	margin: 0px;
+  background: #fcfcfa;
+}
+.background
+{
+	fill: rgba(80,120,100,.5);
+}
+
+.stroke {
+  fill: none;
+  stroke: #000;
+  stroke-width: 3px;
+}
+.fill {
+  fill: #fff;
+}
+.graticule {
+  fill: none;
+  stroke: #777;
+  stroke-width: .5px;
+  stroke-opacity: .5;
+}
+
+.land {
+  fill: #222;
+}
+
+.boundary {
+  fill: none;
+  stroke: #fff;
+  stroke-width: .5px;
+}
+
+.night {
+  stroke: steelblue;
+  fill: steelblue;
+  fill-opacity: .3;
+}
+
+text {
+  font-family: Menlo, monospace;
+}
+
+</style>
+<title>Unemployment Drivers</title>
+<meta charset="utf-8"></head>
+<body>
+<script>
+var width = 900,
+    height = 600,
+    line1 = 300,
+    line2 = 400,
+    line3 = 500;
+    
+    
+//var socket = io.connect();
+//socket.on("generic_data", function(d){
+//data = prep_data(d);
+
+d3.json("JunWaterfallData.json",function(d){
+	var data = {
+		a: d.ur_prior[0],
+		b: d.pop_impact[0],
+		c: d.part_impact[0],
+		d: d.jobs_impact[0],
+		e: d.ur_current[0]
+	}
+	var p = { // points
+		aY : line1,
+		aH : line3-line1,
+		bY : false,
+		bH : false,
+		cY : false,
+		cH : false,
+		dY : false,
+		dH : false,
+		eY : false,
+		eH : false,
+		data : data
+	};
+	
+
+	
+	if (data.b < 0){
+		p.bY = line1;
+		p.bH = line2 - line1;
+		p.bE = p.bY+p.bH;
+	} else {
+		p.bH = line2 - line1;
+		p.bY = p.aY - p.bH;
+		p.bE = p.bY;
+	}
+
+	ratio = p.bH / Math.abs(data.b);
+
+	p.cH = ratio * Math.abs(data.c);
+	if (data.c < 0){
+		p.cY = p.bE;
+		p.cE = p.cY+p.cH;
+	} else {
+		p.cY = p.bE - p.cH;
+		p.cE = p.cY;
+	}
+
+	p.dH = ratio * Math.abs(data.d);
+	if (data.d < 0){
+		p.dY = p.cE;
+		p.dE = p.dY+p.dH;
+	} else {
+		p.dY = p.cE - p.dH;
+		p.dE = p.dY
+	}
+
+	p.eY = p.dE;
+	p.eH = line3 - p.eY;
+
+	draw(p);
+});
+
+function draw(data){
+console.log(data);
+var x1 = 100,
+		x2 = 250,
+		x3 = 400,
+		x4 = 550,
+		x5 = 700;
+
+var svg = d3.select("body").append("svg").attr("id","vis")
+    .attr("width", width)
+    .attr("height", height)
+//    .append("svg:g").attr({transform:"scale(1,2)"});
+
+svg.append("svg:rect").attr({
+	"width": width,
+	"height": height,
+	"fill": "lightgrey"
+});
+
+svg.append("svg:text")
+	.text("DRIVERS OF CHANGE IN THE UNEMPLOYMENT RATE")
+	.attr({
+		"x": 10,
+		"y": 30,
+		"font-size": 30
+	});
+svg.append("svg:text")
+	.text("Percent")
+	.attr({
+		"x": 10,
+		"y": 50
+	});
+
+
+console.log(data);
+
+colors = d3.scale.category10();
+
+
+svg.append("svg:rect")
+	.attr({
+		"x": x1,
+		"y": data.aY,
+		"height": data.aH,
+		"width": 100,
+		"fill": colors(1)
+	});
+svg.append("svg:rect")
+	.attr({
+		"x": x2,
+		"y": data.bY,
+		"height": data.bH,
+		"width": 100,
+		"fill": colors(2)
+	});
+svg.append("svg:rect")
+	.attr({
+		"x": x3,
+		"y": data.cY,
+		"height": data.cH,
+		"width": 100,
+		"fill": colors(3)
+	});
+svg.append("svg:rect")
+	.attr({
+		"x": x4,
+		"y": data.dY,
+		"height": data.dH,
+		"width": 100,
+		"fill": colors(4)
+	});
+svg.append("svg:rect")
+	.attr({
+		"x": x5,
+		"y": data.eY,
+		"height": data.eH,
+		"width": 100,
+		"fill": colors(5)
+	});
+
+svg.append("svg:line")
+	.attr({
+		x1: 50,
+		y1: line3,
+		x2: width-50,
+		y2: line3,
+		stroke: "black"
+	})
+
+svg.append("svg:line")
+	.attr({
+		x1: 50,
+		y1: line3,
+		x2: width-50,
+		y2: line3,
+		stroke: "black"
+	})
+
+svg.append("svg:line")
+	.attr({
+		x1: 100,
+		y1: data.aY,
+		x2: 350,
+		y2: data.aY,
+		stroke: "black",
+		"stroke-dasharray": "5,5"
+	});
+
+svg.append("svg:line")
+	.attr({
+		x1: 250,
+		y1: data.bE,
+		x2: 500,
+		y2: data.bE,
+		stroke: "black",
+		"stroke-dasharray": "5,5"
+	});
+
+svg.append("svg:line")
+	.attr({
+		x1: 400,
+		y1: data.cE,
+		x2: 650,
+		y2: data.cE,
+		stroke: "black",
+		"stroke-dasharray": "5,5"
+	});
+
+svg.append("svg:line")
+	.attr({
+		x1: 550,
+		y1: data.dE,
+		x2: 800,
+		y2: data.dE,
+		stroke: "black",
+		"stroke-dasharray": "5,5"
+	});
+
+var abovelabel = svg.append("svg:g").attr({transform:"matrix(1 0 0 1 -220 370)"});
+
+abovelabel.append("svg:g").attr({transform:"scale(2,1)"})
+.append("svg:g").attr({transform:"rotate(-90)"})
+.append("path").attr({
+d:"m 177,430 5,0 c 6,0 10,0 14,-1 4,-1 8,-4 11,-8 3,-4 4,-8 5,-13 1,-5 1,-14 1,-26 0,-9 0,-15 1,-20 1,-5 3,-10 6,-13 3,-3 7,-5 13,-5 l 0,-16 c -6,0 -10,-2 -13,-5 -3,-3 -5,-8 -6,-13 -1,-5 -1,-11 -1,-20 0,-12 0,-21 -1,-26 -1,-5 -2,-9 -5,-13 -3,-4 -7,-7 -11,-8 -4,-1 -8,-1 -14,-1 l -5,0 0,15 3,0 c 7,0 11,1 13,3 3,3 4,4 4,7 l 0,25 c 0,15 2,25 5,31 3,6 9,10 15,13 -6,3 -12,7 -15,13 -3,6 -5,16 -5,31 l 0,25 c 0,3 -1,4 -4,7 -2,2 -6,3 -13,3 l -3,0 0,15 z",
+fill: "grey"
+})
+
+var thing = data.data.a - data.data.b;
+
+
+abovelabel.append("svg:text").text("Change in unemployment rate: "+thing+"%").attr({
+	x:670,
+	y:-250,
+	"text-anchor": "middle"
+});
+
+
+}
+
+
+</script>
+</body></html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
